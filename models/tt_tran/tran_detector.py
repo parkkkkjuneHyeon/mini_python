@@ -2,7 +2,7 @@ from transformers import pipeline
 
 class TranDetector():
     def __init__(self):
-        self.model_name = "facebook/nllb-200-distilled-600M"
+        self.model_name = "facebook/nllb-200-3.3B"
 
     def detection(self, text:str, from_lang:str, to_lang:str):
         # 언어 선택을 좀 더 자유롭게 하기

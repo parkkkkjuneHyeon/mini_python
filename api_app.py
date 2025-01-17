@@ -16,6 +16,8 @@ port = os.getenv('FFRONT_PORT', 3000)
 
 print(host)
 print(port)
+text_usecase = TextUsecase()
+image_usecase = ImageUsecase()
 app = FastAPI()
 
 class TextRequest(BaseModel):
@@ -30,10 +32,12 @@ class ImageRequest(BaseModel):
 # 허용할 도메인 목록 설정
 origins = [
     "http://127.0.0.1",
+    "http://127.0.0.1:3000",
+    "http://localhost:3000",
     "http://{0}:80".format(host),
     "http://{0}:3000".format(host),
     "http://{0}".format(host),
-    "https://127.0.0.1",
+    "https://127.0.0.1:3000",
     "https://{0}:80".format(host),
     "https://{0}:3000".format(host),
     "https://{0}:{1}".format(host, port),
@@ -53,9 +57,8 @@ app.add_middleware(
 # 파일은 별도로 받고
 @app.post("/images")
 async def create_speech(file: UploadFile,  request: ImageRequest = Depends()):
-    image_usecase = ImageUsecase()
-    contents = await file.read()
     
+    contents = await file.read()
     # ImageUsecase의 excute 메서드에 JSON 데이터를 전달
     speech_result = image_usecase.excute(
         contents, 
@@ -65,12 +68,13 @@ async def create_speech(file: UploadFile,  request: ImageRequest = Depends()):
         request.is_speech
     )
     
-    return {"result": speech_result}
+    return {
+        "result": speech_result
+    }
 
 @app.post("/text")
 async def create_text(request: TextRequest, from_lang:int, to_lang:int, is_summary:bool, is_speech:bool):
     text_jonson_data = jsonable_encoder(request)
-    text_usecase = TextUsecase()
     tran_result = text_usecase.excute(text_jonson_data['text'], from_lang, to_lang, is_summary, is_speech)
 
     return {
